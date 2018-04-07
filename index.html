@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>URL Watcher</title>
+	<style>
+		main { margin:0 auto; width:100%; text-align:center; }
+		.list-container { display:inline-block; padding:4em; vertical-align:top; }
+		.list-container h5 { font-size:2em; }
+		.list-container ul { padding:0; }
+		.list-container ul li { list-style-type:none; margin:.5em; }
+
+		.checkmark { margin:0 .5em; color:green; }
+		.keyword-results { font-size:.5em; }
+	</style>
+</head>
+<body>
+	<main>
+		<p><b>Instructions:</b> <i>Add the url of the page you would like to scan, add keywords you would like to scan for, and then search the pages. Make sure that the pages you are scanning that you either have permission to scan them or scanning them is not prohibited. You can check their Terms of Agreement to confirm</i></p>
+		<div>
+			<div class="list-container">
+				<h5>URL List</h5>
+				<ul id="url-list">
+				</ul>
+			</div>
+			<div class="list-container">
+				<h5>Keywords List</h5>
+				<ul id="keywords-list">
+				</ul>
+			</div>
+		</div>
+		<input type="text" id="url-input">
+		<button id="add-url-button">Add URL</button>
+		<input type="text" id="keyword-input">
+		<button id="add-keyword-button">Add Keyword</button>
+		<button id="search-sites">Search Sites</button>
+	</main>
+
+	<script>
+		
+		let urls = [];
+		let keywords = [];
+		
+		urls.forEach(function (url) {
+			document.getElementById('url-list').innerHTML += `<li id="${url}" class="url-li"></span><a href="${url}" target="_blank">${url}</a></li>`;
+		});
+
+		document.getElementById('add-url-button').addEventListener('click', function () {
+			let url = document.getElementById('url-input').value;
+			if (url !== '') document.getElementById('url-list').innerHTML += `<li id="${url}" class="url-li"><a href="${url}" target="_blank">${url}</a></li>`;
+			urls.push(url)
+			document.getElementById('url-input').value = '';
+		});
+
+		keywords.forEach(function (keyword) {
+			document.getElementById('keywords-list').innerHTML += `<li>${keyword}</li>`;
+		});
+
+		document.getElementById('add-keyword-button').addEventListener('click', function () {
+			let keyword = document.getElementById('keyword-input').value;
+			if (keyword !== '') document.getElementById('keywords-list').innerHTML += `<li>${keyword}</li>`;
+			keywords.push(keyword);
+			document.getElementById('keyword-input').value;
+		});
+
+		document.getElementById('search-sites').addEventListener('click', function () {
+			
+			// let checkmarks = document.getElementsByClassName('checkmark');
+			// for (let i = 0; i < checkmarks.length; i ++) {
+			// 	checkmarks[i].remove();
+			// }
+
+			// let keywordResults = document.getElementsByClassName('keyword-results');
+			// for (let i = 0; i < keywordResults; i ++) {
+			// 	keywordResults[i].remove();
+			// }
+
+			let xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					//console.log(this.responseText);
+					let data = JSON.parse(this.responseText);
+					data.forEach(function (item) {
+						let el = document.getElementsByClassName('url-li');
+						for (let i = 0; i < el.length; i ++) {
+							if (el[i].firstChild.innerHTML === item.url) {
+								let original = el[i].innerHTML;
+								el[i].innerHTML = `<span class="checkmark">✓</span>${original}<span class="keyword-results">(${item.keywords.join(', ')})</span>`;
+							}
+						}
+					});
+				}
+			};
+
+			xhttp.open('POST', 'parse-pages.php', true);
+			xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhttp.send('urls=' + encodeURIComponent(JSON.stringify(urls)) + '&keywords=' + encodeURIComponent(JSON.stringify(keywords)));
+		});
+	</script>
+</body>
+</html>
