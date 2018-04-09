@@ -59,7 +59,7 @@
 			let keyword = document.getElementById('keyword-input').value;
 			if (keyword !== '') document.getElementById('keywords-list').innerHTML += `<li>${keyword}</li>`;
 			keywords.push(keyword);
-			document.getElementById('keyword-input').value;
+			document.getElementById('keyword-input').value = '';
 		});
 
 		document.getElementById('search-sites').addEventListener('click', function () {
@@ -67,7 +67,6 @@
 			let xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 				if (this.readyState == 4 && this.status == 200) {
-					//console.log(this.responseText);
 					let data = JSON.parse(this.responseText);
 					data.forEach(function (item) {
 						let el = document.getElementsByClassName('url-li');
@@ -81,7 +80,7 @@
 				}
 			};
 
-			xhttp.open('POST', 'parse-pages.php', true);
+			xhttp.open('post', 'parse-pages.php', true);
 			xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 			xhttp.send('urls=' + encodeURIComponent(JSON.stringify(urls)) + '&keywords=' + encodeURIComponent(JSON.stringify(keywords)));
 		});
